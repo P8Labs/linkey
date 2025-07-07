@@ -1,26 +1,16 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+"use server";
+import { headers } from "next/headers";
+import { auth } from "./auth";
 
-import { getServerSession } from "next-auth";
-import prisma from "./prisma";
-
-const serverAuth = async () => {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    throw new Error("Not signed in");
+export async function serverAuth() {
+  try {
+    const h = await headers();
+    const session = await auth.api.getSession({
+      headers: h, // you need to pass the headers object.
+    });
+    if (!session) throw new Error("No session found");
+    return session;
+  } catch (error) {
+    return null;
   }
-
-  const currentUser = await prisma.user.findUnique({
-    where: {
-      email: session.user.email,
-    },
-  });
-
-  if (!currentUser) {
-    throw new Error("Not signed in");
-  }
-
-  return { currentUser };
-};
-
-export default serverAuth;
+}

@@ -6,107 +6,95 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-
-
-
-
-
 model User {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  name            String    @default("Linkey User")
-  username        String    @default("")
-  bio             String    @default("I am a linkey user ✌")
-  email           String    @unique
-  emailVerified   DateTime?
-  image           String    @default("https://images.unsplash.com/photo-1523251343397-9225e4cb6319?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80")
-  hashedPassword  String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  apiKey          ApiKey[]
-  apiKeyId        String?
-  shortUrls       ShortUrl[]
-  accounts        Account[]
+  id            String     @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+  shortUrls     ShortUrl[]
+
+  @@unique([email])
+  @@map("user")
 }
-
-model Account {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  userId             String   @db.ObjectId
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.String
-  access_token       String?  @db.String
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.String
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
 
 model ShortUrl {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  shortUrl  String    @unique
+  id        String    @id @default(nanoid())
+  userId    String
+  shorten   String    @unique
   longUrl   String
+  tag       String    @default("personal")
   clicks    Int
   rawData   RawData[]
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("short_url")
 }
 
 model RawData {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  ip        String
-  device    String
-  agents    String
-  shorturlId String @db.ObjectId
-  shortUrl  ShortUrl @relation(fields: [shorturlId], references: [id], onDelete: Cascade)
+  id         String   @id @default(nanoid())
+  ip         String
+  device     String
+  agents     String
+  metadata   Json?
+  shorturlId String
+  shortUrl   ShortUrl @relation(fields: [shorturlId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@map("raw_data")
 }
 
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-
-model ApiKey {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  key     String  @unique
-  enabled Boolean @default(true)
-  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String  @db.ObjectId
-
-  requests ApiRequest[]
-
-  @@unique([userId, key, enabled])
+  @@unique([token])
+  @@map("session")
 }
 
-model ApiRequest {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  timestamp DateTime @default(now())
-  method    String
-  path      String
-  status    Int
-  duration  Int
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
 
-  usedApiKey String
-
-  ApiKey   ApiKey @relation(fields: [apiKeyId], references: [id])
-  apiKeyId String @db.ObjectId
-
-  @@unique([apiKeyId])
+  @@map("account")
 }
 
-model VerificationToken {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  identifier  String
-  token       String    @unique
-  expires     DateTime
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
 
-  @@unique([identifier, token])
+  @@map("verification")
 }
-

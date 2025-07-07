@@ -1,3 +1,129 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+@layer base {
+  :root {
+    /* Custom color palette - Light mode */
+    --primary-blue: #d1e9f6;
+    --primary-yellow: #f6eacb;
+    --primary-peach: #f1d3ce;
+    --primary-pink: #eecad5;
+
+    /* Dark mode variants */
+    --primary-blue-dark: #2a4d5a;
+    --primary-yellow-dark: #5a4d2a;
+    --primary-peach-dark: #5a3d2a;
+    --primary-pink-dark: #5a2d3d;
+
+    /* Shadcn UI variables with your palette */
+    --background: 0 0% 100%;
+    --foreground: 210 11% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
+    --primary: 196 53% 88%; /* #D1E9F6 */
+    --primary-foreground: 210 11% 15%;
+    --secondary: 44 57% 93%; /* #F6EACB */
+    --secondary-foreground: 210 11% 15%;
+    --muted: 44 57% 93%;
+    --muted-foreground: 210 6% 46%;
+    --accent: 14 44% 91%; /* #F1D3CE */
+    --accent-foreground: 210 11% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 196 53% 75%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 210 11% 7%;
+    --foreground: 0 0% 98%;
+    --card: 210 11% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 210 11% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 196 53% 30%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 44 57% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 210 11% 15%;
+    --muted-foreground: 210 6% 64%;
+    --accent: 14 44% 25%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 11% 15%;
+    --input: 210 11% 15%;
+    --ring: 196 53% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom utilities for your color palette with dark mode */
+@layer utilities {
+  .bg-palette-blue {
+    @apply bg-[#D1E9F6] dark:bg-[#2a4d5a];
+  }
+  .bg-palette-yellow {
+    @apply bg-[#F6EACB] dark:bg-[#5a4d2a];
+  }
+  .bg-palette-peach {
+    @apply bg-[#F1D3CE] dark:bg-[#5a3d2a];
+  }
+  .bg-palette-pink {
+    @apply bg-[#EECAD5] dark:bg-[#5a2d3d];
+  }
+
+  .text-palette-blue {
+    @apply text-[#5a9bd4] dark:text-[#87ceeb];
+  }
+  .text-palette-yellow {
+    @apply text-[#e6b800] dark:text-[#ffd700];
+  }
+  .text-palette-peach {
+    @apply text-[#d4806a] dark:text-[#ff9b7a];
+  }
+  .text-palette-pink {
+    @apply text-[#c4809a] dark:text-[#ff9bb5];
+  }
+
+  .border-palette-blue {
+    @apply border-[#D1E9F6] dark:border-[#2a4d5a];
+  }
+  .border-palette-yellow {
+    @apply border-[#F6EACB] dark:border-[#5a4d2a];
+  }
+  .border-palette-peach {
+    @apply border-[#F1D3CE] dark:border-[#5a3d2a];
+  }
+  .border-palette-pink {
+    @apply border-[#EECAD5] dark:border-[#5a2d3d];
+  }
+}

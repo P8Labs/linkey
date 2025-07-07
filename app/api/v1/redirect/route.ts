@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     const shortUrlDoc = await prisma.shortUrl.findUnique({
       where: {
-        shortUrl: shortId,
+        shorten: shortId,
       },
     });
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
     await prisma.shortUrl.update({
       where: {
-        shortUrl: shortId,
+        shorten: shortId,
       },
       data: {
         clicks: shortUrlDoc.clicks++,

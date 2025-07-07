@@ -1,121 +1,92 @@
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import validator from "validator";
 import { z } from "zod";
 
 export async function POST(request: NextRequest) {
-  const apiKey = request.headers.get("authorization");
-
-  if (!apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  function makeid(length: number) {
-    let result = "";
-    const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-  }
-
-  const { longUrl, shortUrl, userId } = await request.json();
-
-  const reservedWords = [
-    "priyanshu",
-    "somveer",
-    "seema",
-    "deepanshi",
-    "tanya",
-    "pv",
-    "priyanshuverma",
-    "owner",
-    "owned",
-    "settings",
-    "admin",
-    "boss",
-    "ceo",
-    "founder",
-  ];
-
-  const shotID: string = shortUrl || makeid(5);
-
-  if (reservedWords.includes(shotID)) {
-    return NextResponse.json(
-      {
-        error: "You Can't use reserved words",
-      },
-      { status: 400 }
-    );
-  }
-
-  if (!longUrl) {
-    return NextResponse.json({
-      error: "Please fill full link Input",
-      status: 400,
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
     });
-  }
-  if (!validator.isURL(longUrl)) {
-    return NextResponse.json(
-      {
-        error: "You Can't use invalid link",
-      },
-      { status: 400 }
-    );
-  }
-  if (!userId) {
-    return NextResponse.json(
-      {
-        error: "You are not authorized to make shot link",
-      },
-      { status: 400 }
-    );
-  } else {
-    try {
-      const shortIDExist = await prisma.shortUrl.findUnique({
-        where: {
-          shortUrl: shotID,
-        },
-      });
 
-      if (shortIDExist) {
-        return NextResponse.json(
-          {
-            error: "short link already exist",
-          },
-          { status: 400 }
-        );
-      }
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { longUrl, shortPart, tag } = await request.json();
+    const userId = session.user.id;
 
-      await prisma.shortUrl.create({
-        data: {
-          shortUrl: shotID,
-          longUrl: longUrl as string,
-          clicks: 0,
-          userId: userId,
-        },
-      });
-      return NextResponse.json({
-        status: 200,
-        message: "Short link created",
-      });
-    } catch (err) {
-      console.log(err);
-      if (err instanceof z.ZodError) {
-        return NextResponse.json(
-          { error: err.issues, createdApiKey: null },
-          { status: 400 }
-        );
-      }
+    const longUrlSchema = z.string().url();
+    const shortPartSchema = z.string().min(1).max(20);
+    const tagSchema = z.string().min(1).max(20);
 
+    const longUrlResult = longUrlSchema.safeParse(longUrl);
+    const shortPartResult = shortPartSchema.safeParse(shortPart);
+    const tagResult = tagSchema.safeParse(tag);
+
+    if (!longUrlResult.success) {
       return NextResponse.json(
-        { error: "Internal Server Error", createdApiKey: null },
+        { error: longUrlResult.error.issues },
+        { status: 400 }
+      );
+    }
+    if (!shortPartResult.success) {
+      return NextResponse.json(
+        { error: shortPartResult.error.issues },
+        { status: 400 }
+      );
+    }
+    if (!tagResult.success) {
+      return NextResponse.json(
+        { error: tagResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const longUrlValue = longUrlResult.data;
+    const shortPartValue = shortPartResult.data;
+    const tagValue = tagResult.data;
+
+    const alreadyShorten = await prisma.shortUrl.findUnique({
+      where: {
+        shorten: shortPartValue,
+      },
+    });
+
+    if (alreadyShorten) {
+      return NextResponse.json(
+        { error: "Short link already exists" },
+        { status: 400 }
+      );
+    }
+
+    const shorten = await prisma.shortUrl.create({
+      data: {
+        shorten: shortPartValue,
+        longUrl: longUrlValue,
+        clicks: 0,
+        tag: tagValue,
+        userId: userId,
+      },
+    });
+
+    if (!shorten) {
+      return NextResponse.json(
+        { error: "Failed to create short link" },
         { status: 500 }
       );
     }
+
+    return NextResponse.json({
+      message: "Short link created successfully",
+    });
+  } catch (error: any) {
+    console.error("Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to do this action" },
+      { status: 500 }
+    );
   }
 }

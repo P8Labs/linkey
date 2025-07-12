@@ -146,7 +146,7 @@ export default function CreateLinkForm() {
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Preview:{" "}
               <span className="font-mono text-palette-blue">
-                {SHORTEN_DOMAIN}/{shortPart}
+                {SHORTEN_DOMAIN()}/{shortPart}
               </span>
             </p>
           )}

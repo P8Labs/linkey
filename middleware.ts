@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  const isRedirectionDomain = nextUrl.hostname === SHORTEN_DOMAIN;
+  const isRedirectionDomain = nextUrl.hostname === SHORTEN_DOMAIN();
 
   if (isRedirectionDomain) {
     return;

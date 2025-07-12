@@ -187,11 +187,11 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-3 mb-2">
                     <Link
-                      href={`${SHORTEN_DOMAIN}/${link.shorten}`}
+                      href={`${SHORTEN_DOMAIN()}/${link.shorten}`}
                       target="_blank"
                       className="text-lg font-medium text-palette-blue font-mono hover:underline truncate"
                     >
-                      {SHORTEN_DOMAIN}/{link.shorten}
+                      {SHORTEN_DOMAIN()}/{link.shorten}
                     </Link>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getTagColor(link.tag)}`}

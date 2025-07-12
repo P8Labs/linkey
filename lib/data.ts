@@ -51,6 +51,7 @@ export async function logClick(id: string, data: Record<string, any> = {}) {
             agents: data.userAgent || "unknown",
             ip: data.ip || "unknown",
             device: data.device || "unknown",
+            referer: data.referrer || "unknown",
           },
         },
       },

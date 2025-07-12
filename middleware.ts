@@ -6,6 +6,7 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   publicRoutes,
 } from "./routes";
+import { SHORTEN_DOMAIN } from "./lib/utils";
 
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
@@ -15,6 +16,12 @@ export async function middleware(req: NextRequest) {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+  const isRedirectionDomain = nextUrl.hostname === SHORTEN_DOMAIN;
+
+  if (isRedirectionDomain) {
+    return;
+  }
 
   if (isApiAuthRoute) {
     return;

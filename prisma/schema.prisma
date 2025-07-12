@@ -46,6 +46,7 @@ model RawData {
   ip         String
   device     String
   agents     String
+  referer    String?
   metadata   Json?
   shorturlId String
   shortUrl   ShortUrl @relation(fields: [shorturlId], references: [id], onDelete: Cascade)

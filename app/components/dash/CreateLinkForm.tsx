@@ -1,6 +1,7 @@
 "use client";
 
 import { SHORTEN_DOMAIN, tags } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const SHORTEN_LEN = 6;
@@ -11,7 +12,7 @@ export default function CreateLinkForm() {
   const [selectedTag, setSelectedTag] = useState("social");
   const [customTag, setCustomTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
   const generateRandomShort = () => {
     const characters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
@@ -28,7 +29,7 @@ export default function CreateLinkForm() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await fetch("/api/v1/create", {
+      const res = await fetch("/api/v1/shorten", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,6 +58,7 @@ export default function CreateLinkForm() {
       setShortPart("");
       setCustomTag("");
       setIsLoading(false);
+      router.refresh(); // Refresh the page to show the new link
     }
   };
 

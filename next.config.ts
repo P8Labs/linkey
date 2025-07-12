@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       afterFiles: [
         {
           source: "/:shorten",
-          destination: "/api/r/:shorten",
+          destination: "/api/v1/r/:shorten",
         },
       ],
     };

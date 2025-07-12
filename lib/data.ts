@@ -15,6 +15,9 @@ export async function fetchlinks() {
       where: {
         userId: session.user.id,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     return links;

@@ -3,12 +3,17 @@
 import { authClient } from "@/lib/auth-client";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function TopBar() {
+  const [isMounted, setIsMounted] = useState(false);
   const { setTheme, theme } = useTheme();
   const router = useRouter();
   const isDark = theme == "dark";
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const toggleTheme = () => {
     if (isDark) {
       setTheme("light");
@@ -21,6 +26,9 @@ export default function TopBar() {
     await authClient.signOut();
     router.push("/");
   };
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div
@@ -50,7 +58,7 @@ export default function TopBar() {
             </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3" suppressHydrationWarning>
             <button
               onClick={toggleTheme}
               className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200"

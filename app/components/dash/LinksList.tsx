@@ -2,14 +2,17 @@
 
 import { SHORTEN_DOMAIN, tags } from "@/lib/utils";
 import { ShortUrl } from "@prisma/client";
-import { Copy, Edit, ExternalLink, Eye, LinkIcon } from "lucide-react";
+import { Copy, Edit, Eye, LinkIcon, Trash } from "lucide-react";
 import React, { useState } from "react";
 import moment from "moment";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LinksList({ links }: { links: ShortUrl[] }) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [editForm, setEditForm] = useState({
     longUrl: "",
     tag: "",
@@ -51,9 +54,65 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
     setEditForm({ longUrl: link.longUrl, tag: link.tag, customTag: "" });
   };
 
-  const saveEdit = () => {
-    console.log("Saving edit:", editForm);
-    setEditingId(null);
+  const saveEdit = async () => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        id: editingId,
+        longUrl: editForm.longUrl,
+        tag: editForm.tag === "custom" ? editForm.customTag : editForm.tag,
+      };
+
+      const res = await fetch("/api/v1/shorten", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error creating link:", errorData);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Link created successfully:", data);
+    } catch (error) {
+      console.error("Error creating link:", error);
+    } finally {
+      setEditingId(null);
+      router.refresh(); // Refresh the page to show the new link
+      setEditForm({ longUrl: "", tag: "", customTag: "" });
+      setIsLoading(false);
+      setSelectedFilter("all"); // Reset filter to show all links after edit
+    }
+  };
+
+  const deleteLink = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/v1/shorten`, {
+        method: "DELETE",
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error deleting link:", errorData);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Link deleted successfully");
+      router.refresh(); // Refresh the page to show updated links
+    } catch (error) {
+      console.error("Error deleting link:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredLinks =
@@ -170,6 +229,13 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
                   >
                     <Edit className="h-4 w-4" />
                   </button>
+                  <button
+                    onClick={() => deleteLink(link.id)}
+                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-600/10 rounded-lg transition-all duration-200"
+                    title="Delete link"
+                  >
+                    <Trash className="h-4 w-4 text-red-400" />
+                  </button>
                 </div>
               </div>
 
@@ -182,6 +248,7 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
                         Long URL
                       </label>
                       <input
+                        disabled={isLoading}
                         type="url"
                         value={editForm.longUrl}
                         onChange={(e) =>
@@ -198,6 +265,7 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
                       <div className="flex flex-wrap gap-2 mb-3">
                         {tags.map((tag) => (
                           <button
+                            disabled={isLoading}
                             key={tag.value}
                             type="button"
                             onClick={() =>
@@ -217,6 +285,7 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
 
                       {editForm.tag === "custom" && (
                         <input
+                          disabled={isLoading}
                           type="text"
                           value={editForm.customTag}
                           onChange={(e) =>
@@ -233,12 +302,14 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
 
                     <div className="flex space-x-3">
                       <button
+                        disabled={isLoading}
                         onClick={saveEdit}
                         className="px-4 py-2 bg-palette-blue text-palette-blue text-sm font-medium rounded-lg hover:bg-[#C1D9E6] dark:hover:bg-[#3a5d6a] transition-all duration-200"
                       >
-                        Save Changes
+                        {isLoading ? "Saving..." : "Save Changes"}
                       </button>
                       <button
+                        disabled={isLoading}
                         onClick={() => setEditingId(null)}
                         className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
                       >

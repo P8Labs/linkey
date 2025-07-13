@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
 const updateShortenSchema = z.object({
   longUrl: z.string().url(),
-  id: z.string().min(1).max(20),
+  id: z.string().min(3),
   tag: z.string().min(1).max(20),
 });
 // Update the shorten URL

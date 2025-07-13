@@ -10,21 +10,19 @@ import { SHORTEN_DOMAIN } from "./lib/utils";
 
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
-  const sessionCookie = getSessionCookie(req);
-  const isLoggedIn = !!sessionCookie;
-
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  const isRedirectionDomain = nextUrl.hostname == SHORTEN_DOMAIN();
+  const host = req.headers.get("host") || "";
+  const isRedirectionDomain = host == SHORTEN_DOMAIN(true);
 
   if (isRedirectionDomain) {
-    return Response.redirect(
-      new URL(`/r/${nextUrl.pathname.split("/").pop() || ""}`, nextUrl),
-      302
-    );
+    return;
   }
+
+  const sessionCookie = getSessionCookie(req);
+  const isLoggedIn = !!sessionCookie;
 
   if (isApiAuthRoute) {
     return;

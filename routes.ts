@@ -5,8 +5,6 @@
  */
 export const publicRoutes: string[] = [
   "/",
-  "/auth/verify",
-  "/api/user",
   "/about",
   "/contact",
   "/privacy",
@@ -15,8 +13,6 @@ export const publicRoutes: string[] = [
   "/features",
   "/pricing",
   "/faq",
-  "/changelog",
-  "/site",
 ];
 
 /**

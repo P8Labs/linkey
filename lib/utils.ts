@@ -5,8 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const SHORTEN_DOMAIN = () => {
+export const SHORTEN_DOMAIN = (onlyHost = false) => {
   const domain = process.env.NEXT_PUBLIC_SHORTEN_DOMAIN || "localhost:3000";
+  if (onlyHost) {
+    return domain;
+  }
   let protocal;
   if (domain.includes("localhost")) {
     protocal = "http://";

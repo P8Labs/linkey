@@ -214,7 +214,7 @@ export default function LinksList({ links }: { links: ShortUrl[] }) {
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={() =>
-                      copyToClipboard(`${SHORTEN_DOMAIN}/${link.shorten}`)
+                      copyToClipboard(`${SHORTEN_DOMAIN()}/${link.shorten}`)
                     }
                     className="p-2 text-gray-400 dark:text-gray-500 hover:text-palette-blue hover:bg-palette-blue/10 rounded-lg transition-all duration-200"
                     title="Copy link"

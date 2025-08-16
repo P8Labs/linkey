@@ -19,6 +19,10 @@ export const SHORTEN_DOMAIN = (onlyHost = false) => {
 
   return `${protocal}${domain}`;
 };
+
+export const MAIN_DOMAIN =
+  process.env.NEXT_PUBLIC_MAIN_DOMAIN || "localhost:3000";
+
 export const tags = [
   {
     value: "social",

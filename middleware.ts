@@ -6,7 +6,7 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   publicRoutes,
 } from "./routes";
-import { SHORTEN_DOMAIN } from "./lib/utils";
+import { MAIN_DOMAIN, SHORTEN_DOMAIN } from "./lib/utils";
 
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
@@ -17,7 +17,19 @@ export async function middleware(req: NextRequest) {
   const host = req.headers.get("host") || "";
   const isRedirectionDomain = host == SHORTEN_DOMAIN(true);
 
+  const redirectionDomainPathRestricted = [
+    "/app",
+    "/",
+    "/auth",
+    "/auth/verify",
+  ];
+
   if (isRedirectionDomain) {
+    if (redirectionDomainPathRestricted.includes(nextUrl.pathname)) {
+      const newUrl = `https://${MAIN_DOMAIN}${nextUrl.pathname}`;
+      return Response.redirect(new URL(newUrl, nextUrl));
+    }
+
     return;
   }
 
@@ -35,7 +47,7 @@ export async function middleware(req: NextRequest) {
     return;
   }
 
-  if (!isLoggedIn && !isPublicRoute) {
+  if (!isLoggedIn && !isPublicRoute && !isAuthRoute) {
     let callbackUrl = nextUrl.pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;

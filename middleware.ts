@@ -24,6 +24,10 @@ export async function middleware(req: NextRequest) {
     "/auth/verify",
   ];
 
+  if (nextUrl.pathname.startsWith("/auth/verify")) {
+    return;
+  }
+
   if (isRedirectionDomain) {
     if (redirectionDomainPathRestricted.includes(nextUrl.pathname)) {
       const newUrl = `https://${MAIN_DOMAIN}${nextUrl.pathname}`;
